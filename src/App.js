@@ -5,18 +5,33 @@
 */
 
 // State hook u import edin
-import React from "react";
 
+import React, { useState } from "react";
+import Gonderiler from "./bilesenler/Gonderiler/Gonderiler";
+import AramaCubugu from "./bilesenler/AramaCubugu/AramaCubugu";
+import sahteVeri from "./sahte-veri";
 // Gönderiler (çoğul!) ve AramaÇubuğu bileşenlerini import edin, çünkü bunlar App bileşeni içinde kullanılacak
 // sahteVeri'yi import edin
 import "./App.css";
 
 const App = () => {
+  const [gonderiler, setGonderiler] = useState(sahteVeri);
+  const [arama, setArama] = useState("");
+  const [begendiklerim, setBegendiklerim] = useState([]);
   // Gönderi nesneleri dizisini tutmak için "gonderiler" adlı bir state oluşturun, **sahteVeri'yi yükleyin**.
   // Artık sahteVeri'ye ihtiyacınız olmayacak.
   // Arama çubuğunun çalışması için , arama kriterini tutacak başka bir state'e ihtiyacımız olacak.
 
-  const gonderiyiBegen = (gonderiID) => {
+  const gonderiyiBegen = gonderiID => {
+    const guncellenmisGonderiler = gonderiler.map(post => {
+      if (gonderiID === post.id && !begendiklerim.includes(gonderiID)) {
+        post.likes++;
+        begendiklerim.push(gonderiID);
+        setBegendiklerim(begendiklerim);
+      }
+      return post;
+    });
+    setGonderiler(guncellenmisGonderiler);
     /*
       Bu fonksiyon, belirli bir id ile gönderinin beğeni sayısını bir artırma amacına hizmet eder.
 
@@ -29,13 +44,22 @@ const App = () => {
         - aksi takdirde, sadece gönderi nesnesini değiştirmeden döndürün.
      */
   };
-
+  const changeHandler = event => {
+    setArama(event.target.value);
+    const filterGonderiler = sahteVeri.filter(item => {
+      return item.username.includes(event.target.value);
+    });
+    setGonderiler(filterGonderiler);
+  };
   return (
     <div className="App">
-      App Çalışıyor
       {/* Yukarıdaki metni projeye başladığınızda silin*/}
-      {/* AramaÇubuğu ve Gönderiler'i render etmesi için buraya ekleyin */}
-      {/* Her bileşenin hangi proplara ihtiyaç duyduğunu kontrol edin, eğer ihtiyaç varsa ekleyin! */}
+      <AramaCubugu
+        arama={arama}
+        setArama={setArama}
+        changeHandler={changeHandler}
+      />
+      <Gonderiler gonderiler={gonderiler} gonderiyiBegen={gonderiyiBegen} />
     </div>
   );
 };
